@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chroniques de la Dopamine</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="header">
+    <div class="header-title">Chroniques<br>de la Dopamine</div>
+    <div class="header-stats">
+        <div class="stat-badge streak-badge">
+            <span class="icon">🔥</span>
+            <span id="streakCount">0</span>j
+        </div>
+        <div class="stat-badge">
+            <span class="icon">💉</span>
+            <span id="dopamineCount">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="hp-section">
+    <div class="hp-header">
+        <span class="hp-label">CITADELLE</span>
+        <span class="hp-value"><span id="hpCurrent">100</span> / <span id="hpMax">100</span> PV</span>
+    </div>
+    <div class="hp-bar-bg">
+        <div class="hp-bar-fill" id="hpBar" style="width:100%"></div>
+    </div>
+</div>
+
+<div class="game-arena">
+    <div class="arena-inner" id="arenaInner">
+        <div class="arena-sky"></div>
+        <div class="defense-indicator">
+            <span class="def-label">DÉFENSE</span>
+            <span id="totalDefense">0</span>
+        </div>
+        <div class="attack-timer">
+            <span class="timer-label">ATTAQUE DANS</span>
+            <span id="timerDisplay">05:00</span>
+        </div>
+        <div class="citadel-area">
+            <img id="citadelImg" class="citadel-img" src="citadel-lv1-healthy.png" alt="Citadelle"
+                onerror="this.style.opacity='0.3'">
+            <div class="units-row">
+                <div class="unit-slot" id="unitsLeft"></div>
+                <div class="unit-slot-center" id="unitsCenter"></div>
+                <div class="unit-slot" id="unitsRight"></div>
+            </div>
+        </div>
+        <div class="palisade-area" id="palisadeArea">
+            <div class="no-palisade" id="noPalisade"></div>
+            <img id="palisadeImg" src="" alt="Palissade" class="palisade-img" style="display:none"
+                onerror="this.style.display='none'; document.getElementById('noPalisade').style.display='block'">
+        </div>
+        <div class="ground-line"></div>
+        <div class="level-badge" id="levelBadge">NIVEAU 1</div>
+    </div>
+</div>
+
+<div class="bottom-panel">
+    <button class="btn-main" onclick="completeMajorTask()">📅 MES TÂCHES DU JOUR</button>
+    <div class="btn-row">
+        <button class="btn-secondary" onclick="openModal('defenses')">
+            <span class="btn-icon">🛡️</span>
+            MES DÉFENSES
+        </button>
+        <button class="btn-secondary" onclick="openModal('tasks')">
+            <span class="btn-icon">📅</span>
+            CONFIGURER
+        </button>
+        <button class="btn-secondary" onclick="openModal('stats')">
+            <span class="btn-icon">📊</span>
+            STATS
+        </button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-defenses">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Mes Défenses</div>
+            <button class="modal-close" onclick="closeModal('defenses')">✕</button>
+        </div>
+        <div class="modal-body" id="defensesBody"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-tasks">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Mes Tâches</div>
+            <button class="modal-close" onclick="closeModal('tasks')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="attack-preview">
+                <span>⚔️ Prochaine attaque :</span>
+                <span class="ap-value" id="attackPreviewVal">--</span>
+                <span style="font-size:6px;color:var(--text-dim)">dégâts estimés</span>
+            </div>
+            <div class="task-tabs">
+                <button class="task-tab active" onclick="switchTaskTab('daily')">📅<br>QUOTIDIEN</button>
+                <button class="task-tab" onclick="switchTaskTab('important')">⭐<br>IMPORTANT</button>
+                <button class="task-tab" onclick="switchTaskTab('bonus')">🏆<br>BONUS</button>
+                <button class="task-tab" onclick="switchTaskTab('custom')">✏️<br>MES TÂCHES</button>
+            </div>
+            <div class="task-tab-panel active" id="panel-daily">
+                <div style="font-size:7px;color:var(--text-dim);margin-bottom:8px;">Active une tâche = ajoute à ta journée · ✓ = accomplie</div>
+                <div id="list-daily"></div>
+            </div>
+            <div class="task-tab-panel" id="panel-important">
+                <div style="font-size:7px;color:var(--text-dim);margin-bottom:8px;">Tâches plus lourdes · plus de dopamine</div>
+                <div id="list-important"></div>
+            </div>
+            <div class="task-tab-panel" id="panel-bonus">
+                <div style="font-size:7px;color:var(--text-dim);margin-bottom:8px;">Tâches exceptionnelles · gros bonus</div>
+                <div id="list-bonus"></div>
+            </div>
+            <div class="task-tab-panel" id="panel-custom">
+                <div style="font-size:7px;color:var(--text-dim);margin-bottom:8px;">Tes tâches personnalisées</div>
+                <div id="list-custom"></div>
+                <div class="add-task-form">
+                    <div style="font-size:7px; color:var(--text-dim); margin-bottom:10px;">+ NOUVELLE TÂCHE</div>
+                    <input type="text" id="newTaskName" placeholder="Nom de la tâche...">
+                    <div class="add-task-row">
+                        <select class="reward-select" id="newTaskReward">
+                            <option value="25">💉 25</option>
+                            <option value="50" selected>💉 50</option>
+                            <option value="100">💉 100</option>
+                            <option value="150">💉 150</option>
+                            <option value="200">💉 200</option>
+                        </select>
+                        <button class="btn-add-task" onclick="addTask()">AJOUTER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-stats">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Statistiques</div>
+            <button class="modal-close" onclick="closeModal('stats')">✕</button>
+        </div>
+        <div class="modal-body" id="statsBody"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="game.js"></script>
+</body>
+</html>
